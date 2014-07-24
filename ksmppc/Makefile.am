@@ -1,0 +1,19 @@
+AUTOMAKE_OPTIONS    = subdir-objects
+ACLOCAL_AMFLAGS     = -I m4
+AM_CPPFLAGS         = $(DEPS_CFLAGS) $(BOOST_CFLAGS)
+ksmppcd_LDADD       = $(DEPS_LIBS) $(BOOST_LIBS)
+bin_PROGRAMS        = ksmppcd
+ksmppcd_SOURCES     = src/bind_type.hpp \
+                      src/configuration_manager.hpp \
+                      src/handler_send.cpp \
+                      src/handler_send.hpp \
+                      src/ksmppc.cpp \
+                      src/ksmppc.hpp \
+                      src/main.cpp \
+                      src/session_manager.cpp \
+                      src/session_manager.hpp \
+                      src/sharedsmpppdu.hpp \
+                      src/smpppdu_queue.hpp \
+                      src/transmit_queue.hpp
+dist_noinst_SCRIPTS = autogen.sh
+
