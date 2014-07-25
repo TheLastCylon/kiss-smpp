@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS    = subdir-objects
 ACLOCAL_AMFLAGS     = -I m4
 AM_CPPFLAGS         = $(DEPS_CFLAGS) $(BOOST_CFLAGS)
-ksmppcd_LDADD       = $(DEPS_LIBS) $(BOOST_LIBS)
+ksmppcd_LDADD       = $(DEPS_LIBS) $(BOOST_LIBS) $(PTHREAD_LIB)
 bin_PROGRAMS        = ksmppcd
 ksmppcd_SOURCES     = src/bind_type.hpp \
                       src/configuration_manager.hpp \

@@ -19,3 +19,21 @@
 *.exe
 *.out
 *.app
+
+# Temporary files
+*.swp
+*.pc
+
+Makefile
+Makefile.in
+autom4te.cache
+config.*
+configure
+depcomp
+install-sh
+ksmppcd
+missing
+.deps
+.dirstamp
+stamp-h*
+
