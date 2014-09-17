@@ -40,7 +40,7 @@ class SendHandler : public kisscpp::RequestHandler
                 SharedSafeSmppPduQ snQ) :
       kisscpp::RequestHandler("send", "Used for sending messages.")
     {
-      kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+      kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
       sendingQ = snQ;
       config   = cfg;

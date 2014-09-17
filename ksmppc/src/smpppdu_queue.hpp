@@ -41,9 +41,9 @@ class SmppPduBase64Bicoder : public kisscpp::Base64BiCoder<smpp_pdu::SMPP_PDU>
     //--------------------------------------------------------------------------------
     virtual boost::shared_ptr<std::string> encode(const boost::shared_ptr<smpp_pdu::SMPP_PDU> obj2encode)
     {
-      kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
-      std::string         tstr = obj2encode->encode();
-      std::stringstream   ss;
+      kisscpp::LogStream log(__PRETTY_FUNCTION__);
+      std::string        tstr = obj2encode->encode();
+      std::stringstream  ss;
 
       smpp_pdu::hex_dump(reinterpret_cast<const uint8_t*>(tstr.c_str()), tstr.size(), ss);
       log << "Encoding:\n" << ss.str() << kisscpp::manip::endl;
@@ -54,7 +54,7 @@ class SmppPduBase64Bicoder : public kisscpp::Base64BiCoder<smpp_pdu::SMPP_PDU>
     //--------------------------------------------------------------------------------
     virtual boost::shared_ptr<smpp_pdu::SMPP_PDU> decode(const std::string& str2decode)
     {
-      kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+      kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
       log << "String 2 decode: " << str2decode << kisscpp::manip::endl;
 
@@ -117,9 +117,9 @@ class SmppPduBase64Bicoder : public kisscpp::Base64BiCoder<smpp_pdu::SMPP_PDU>
   private:
     void ppdustr(const char *tmp_buff, unsigned tmp_len)
     {
-      kisscpp::LogStream  log(-1, __PRETTY_FUNCTION__);
-      unsigned             c1       = 0;
-      unsigned             c2       = 0;
+      kisscpp::LogStream  log(__PRETTY_FUNCTION__);
+      unsigned            c1       = 0;
+      unsigned            c2       = 0;
       log << kisscpp::manip::hex;
       for(unsigned i = 0; i < tmp_len; ++i) {
         if(c1 > 3) {

@@ -25,7 +25,7 @@ ksmppc::ksmppc(SharedConfig cfg) :
   Server(cfg->server_host(), cfg->server_port(), 1),
   running(true)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__, "/home/bothadj/tmp/ksmppcTestLog", true);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__, "/home/bothadj/tmp/ksmppcTestLog", true);
 
   config = cfg;
 
@@ -40,7 +40,7 @@ ksmppc::ksmppc(SharedConfig cfg) :
 //--------------------------------------------------------------------------------
 ksmppc::~ksmppc()
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   running = false;
   stop();
@@ -51,7 +51,7 @@ ksmppc::~ksmppc()
 //--------------------------------------------------------------------------------
 void ksmppc::constructQueues()
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   sendingBuffer.reset(new SafeSmppPduQ("sendingBuffer", "/tmp", 10)); // TODO: The working direcory needs to be obtained from the Config file.
   recieveBuffer.reset(new SafeSmppPduQ("recieveBuffer", "/tmp", 10));
@@ -61,7 +61,7 @@ void ksmppc::constructQueues()
 //--------------------------------------------------------------------------------
 void ksmppc::registerHandlers()
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   if(config->bindType() != RX) { // conditional creation of send handler. i.e. If we only recieve, no sending can take place.
     sendHandler.reset(new SendHandler(config, sendingBuffer));
@@ -72,7 +72,7 @@ void ksmppc::registerHandlers()
 //--------------------------------------------------------------------------------
 void ksmppc::startSessions()
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   session.reset(new SessionManager(sessionIoService, config, recieveBuffer));
   threadGroup.create_thread(boost::bind(&boost::asio::io_service::run, &sessionIoService));
@@ -81,7 +81,7 @@ void ksmppc::startSessions()
 //--------------------------------------------------------------------------------
 void ksmppc::recieveProcessor()
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   while(running) {
     if(recieveBuffer->empty()) {
@@ -117,7 +117,7 @@ void ksmppc::recieveProcessor()
 //--------------------------------------------------------------------------------
 void ksmppc::sendingProcessor()
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   while(running) {
     if(sendingBuffer->empty()) {
@@ -136,7 +136,7 @@ void ksmppc::sendingProcessor()
 //--------------------------------------------------------------------------------
 void ksmppc::smpp2ptree(SharedSmppPdu pdu, BoostPtree &pt)
 {
-  kisscpp::LogStream     log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream     log(__PRETTY_FUNCTION__);
   smpp_pdu::CommandId cmdid = pdu->command_id;
 
   switch(cmdid.value()) {
@@ -150,14 +150,14 @@ void ksmppc::smpp2ptree(SharedSmppPdu pdu, BoostPtree &pt)
 //--------------------------------------------------------------------------------
 void ksmppc::dataSm2Ptree(SharedSmppPdu pdu, BoostPtree &pt)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
   /*not implemented yet*/
 }
 
 //--------------------------------------------------------------------------------
 void ksmppc::deliverSm2Ptree(SharedSmppPdu pdu, BoostPtree &pt)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   SharedPduDeliverSm tpdu = boost::dynamic_pointer_cast<smpp_pdu::PDU_deliver_sm>(pdu);
 

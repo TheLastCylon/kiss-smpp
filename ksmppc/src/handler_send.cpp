@@ -23,7 +23,7 @@
 void SendHandler::run(const BoostPtree& request, BoostPtree& response)
 {
   // TODO: basic validation on the various parts of the request
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   try {
 
