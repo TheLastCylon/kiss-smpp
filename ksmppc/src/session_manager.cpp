@@ -98,7 +98,7 @@ void SessionManager::setTxq()
 //--------------------------------------------------------------------------------
 void SessionManager::connect()
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
   log << "Connecting" << kisscpp::manip::endl;
   boost::asio::async_connect(socket_,
                              endpoint_iterator,
@@ -108,7 +108,7 @@ void SessionManager::connect()
 //--------------------------------------------------------------------------------
 void SessionManager::setCurrentState(State p)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   currentState = p;
 
@@ -170,7 +170,7 @@ void SessionManager::send_pdu(const SharedSmppPdu pdu)
 //--------------------------------------------------------------------------------
 void SessionManager::close_session(bool re_connect /* = false */)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
   reconnectFlag = re_connect;
 
   switch(currentState) {
@@ -191,7 +191,7 @@ void SessionManager::close_session(bool re_connect /* = false */)
 //--------------------------------------------------------------------------------
 void SessionManager::close_connection()
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   setCurrentState(SessionManager::CLOSED);
 
@@ -219,7 +219,7 @@ void SessionManager::close_connection()
 //--------------------------------------------------------------------------------
 void SessionManager::handle_connect(const boost::system::error_code& error)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   if (!error) {
     log << "Connected" << kisscpp::manip::endl;
@@ -249,7 +249,7 @@ void SessionManager::handle_connect(const boost::system::error_code& error)
 //--------------------------------------------------------------------------------
 void SessionManager::handle_read_header(SharedRawPdu rawpdu, const boost::system::error_code& error)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   if(!error) {
     log << "Header Read success: Command Length [" << rawpdu->cmd_length()
@@ -279,7 +279,7 @@ void SessionManager::handle_read_header(SharedRawPdu rawpdu, const boost::system
 //--------------------------------------------------------------------------------
 void SessionManager::handle_read_body(SharedRawPdu rawpdu, const boost::system::error_code& error)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   if(!error) {
     w4rQ_pop     (rawpdu);
@@ -314,7 +314,7 @@ void SessionManager::handle_read_body(SharedRawPdu rawpdu, const boost::system::
 //--------------------------------------------------------------------------------
 void SessionManager::handle_write(const boost::system::error_code& error)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   if(!error) {
     boost::lock_guard<boost::mutex> guard(writeMutex);
@@ -339,7 +339,7 @@ void SessionManager::handle_write(const boost::system::error_code& error)
 //--------------------------------------------------------------------------------
 void SessionManager::throttle_check()
 {
-  kisscpp::LogStream      log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream      log(__PRETTY_FUNCTION__);
   boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
   if(now < throttleNextSendTime) {
     boost::posix_time::time_duration td = throttleNextSendTime - now;
@@ -354,7 +354,7 @@ void SessionManager::throttle_check()
 //--------------------------------------------------------------------------------
 void SessionManager::do_write(const SharedSmppPdu pdu, unsigned priority /*= TransmitQ::MESSAGE*/)
 {
-  kisscpp::LogStream             log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream             log(__PRETTY_FUNCTION__);
   boost::lock_guard<boost::mutex> guard(writeMutex);
 
   bool write_in_progress = writing(); // if the queue is not empty, we are busy writing.
@@ -369,7 +369,7 @@ void SessionManager::do_write(const SharedSmppPdu pdu, unsigned priority /*= Tra
 //--------------------------------------------------------------------------------
 void SessionManager::write_pdu()
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
   SharedSmppPdu       pdu2send = txQ->pop();
 
   if(pdu2send->sequence_number <= smpp_pdu::SequenceNumber::Min) {
@@ -389,7 +389,7 @@ void SessionManager::write_pdu()
 //--------------------------------------------------------------------------------
 void SessionManager::do_bind_request()
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
   SharedPduBindType   bindRequestPDU;
 
   switch(typeOfBind) {
@@ -414,7 +414,7 @@ void SessionManager::do_bind_request()
 //--------------------------------------------------------------------------------
 void SessionManager::do_unbind_request()
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
   SharedPduUnbind     unbindRequestPDU;
   unbindRequestPDU.reset(new smpp_pdu::PDU_unbind());
   //unbindRequestPDU->sequence_number = seqNumGen.next();
@@ -424,7 +424,7 @@ void SessionManager::do_unbind_request()
 //--------------------------------------------------------------------------------
 void SessionManager::send4state_bound_tx(const SharedSmppPdu pdu)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   switch(pdu->command_id) {
     case smpp_pdu::CommandId::BroadcastSm      :
@@ -448,7 +448,7 @@ void SessionManager::send4state_bound_tx(const SharedSmppPdu pdu)
 //--------------------------------------------------------------------------------
 void SessionManager::send4state_bound_rx(const SharedSmppPdu pdu)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   switch(pdu->command_id) {
     case smpp_pdu::CommandId::DataSmResp     :
@@ -465,7 +465,7 @@ void SessionManager::send4state_bound_rx(const SharedSmppPdu pdu)
 //--------------------------------------------------------------------------------
 void SessionManager::send4state_bound_trx(const SharedSmppPdu pdu)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   switch(pdu->command_id) {
     case smpp_pdu::CommandId::BroadcastSm      :
@@ -491,7 +491,7 @@ void SessionManager::send4state_bound_trx(const SharedSmppPdu pdu)
 //--------------------------------------------------------------------------------
 void SessionManager::process4state(SharedRawPdu rawpdu)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   reschedule_enquire_link(); // we have a full SMPP PDU. the next enquire link should be delayed.
 
@@ -525,7 +525,7 @@ void SessionManager::process4state(SharedRawPdu rawpdu)
 //--------------------------------------------------------------------------------
 void SessionManager::process4state_open(SharedRawPdu rawpdu)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   switch(rawpdu->cmd_id()) {
     case smpp_pdu::CommandId::BindReceiverResp   : procpdu_bind_resp        (rawpdu, BOUND_RX ); break;
@@ -542,7 +542,7 @@ void SessionManager::process4state_open(SharedRawPdu rawpdu)
 //--------------------------------------------------------------------------------
 void SessionManager::process4state_bound_tx(SharedRawPdu rawpdu)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   switch(rawpdu->cmd_id()) {
     case smpp_pdu::CommandId::BroadcastSmResp      : procpdu_broadcast_sm_resp       (rawpdu); break;
@@ -566,7 +566,7 @@ void SessionManager::process4state_bound_tx(SharedRawPdu rawpdu)
 //--------------------------------------------------------------------------------
 void SessionManager::process4state_bound_rx(SharedRawPdu rawpdu)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   switch(rawpdu->cmd_id()) {
     case smpp_pdu::CommandId::AlertNotification: procpdu_alert_notification(rawpdu); break;
@@ -584,7 +584,7 @@ void SessionManager::process4state_bound_rx(SharedRawPdu rawpdu)
 //--------------------------------------------------------------------------------
 void SessionManager::process4state_bound_trx(SharedRawPdu rawpdu)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   switch(rawpdu->cmd_id()) {
     case smpp_pdu::CommandId::AlertNotification    : procpdu_alert_notification      (rawpdu); break;
@@ -611,7 +611,7 @@ void SessionManager::process4state_bound_trx(SharedRawPdu rawpdu)
 //--------------------------------------------------------------------------------
 void SessionManager::process4state_unbound(SharedRawPdu rawpdu)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   switch(rawpdu->cmd_id()) {
     case smpp_pdu::CommandId::EnquireLink    : procpdu_enquire_link     (rawpdu); break;
@@ -624,14 +624,14 @@ void SessionManager::process4state_unbound(SharedRawPdu rawpdu)
 //--------------------------------------------------------------------------------
 void SessionManager::process4state_closed(SharedRawPdu rawpdu)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
   // one should not be able to recieve during a closed state!!!
 }
 
 //--------------------------------------------------------------------------------
 void SessionManager::process4state_outbound(SharedRawPdu rawpdu)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   switch(rawpdu->cmd_id()) {
     case smpp_pdu::CommandId::BindReceiverResp   : procpdu_bind_resp        (rawpdu, BOUND_RX ); break;
@@ -647,7 +647,7 @@ void SessionManager::process4state_outbound(SharedRawPdu rawpdu)
 //--------------------------------------------------------------------------------
 void SessionManager::procpdu_bind_resp(SharedRawPdu rawpdu, State stateAferSuccess)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   if(rawpdu->cmd_status() == smpp_pdu::CommandStatus::ESME_ROK) {
     setCurrentState(stateAferSuccess);
@@ -697,7 +697,7 @@ void SessionManager::procpdu_data_sm_resp(SharedRawPdu rawpdu)
 //--------------------------------------------------------------------------------
 void SessionManager::procpdu_deliver_sm(SharedRawPdu rawpdu)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
   std::stringstream   ss;
   SharedSmppPdu       recievedPDU;
   SharedPduDeliverSm  tpdu;
@@ -736,7 +736,7 @@ void SessionManager::procpdu_deliver_sm(SharedRawPdu rawpdu)
 //--------------------------------------------------------------------------------
 void SessionManager::procpdu_enquire_link(SharedRawPdu rawpdu)
 {
-  kisscpp::LogStream         log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream         log(__PRETTY_FUNCTION__);
   smpp_pdu::PDU_enquire_link recieved_pdu(rawpdu->c_str());
   SharedPduEnquireLinkResp   responsePDU;
 
@@ -751,7 +751,7 @@ void SessionManager::procpdu_enquire_link(SharedRawPdu rawpdu)
 //--------------------------------------------------------------------------------
 void SessionManager::procpdu_enquire_link_resp(SharedRawPdu rawpdu)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   // we have recieved a response to an enquire_link.
   enquire_link_response_timer.cancel();
@@ -790,7 +790,7 @@ void SessionManager::procpdu_submit_multi_resp(SharedRawPdu rawpdu)
 //--------------------------------------------------------------------------------
 void SessionManager::procpdu_submit_sm_resp(SharedRawPdu rawpdu)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   log << "Command Length: " << rawpdu->cmd_length() << kisscpp::manip::endl;
   std::stringstream ss;
@@ -812,7 +812,7 @@ void SessionManager::procpdu_submit_sm_resp(SharedRawPdu rawpdu)
 //--------------------------------------------------------------------------------
 void SessionManager::procpdu_unbind(SharedRawPdu rawpdu)
 {
-  kisscpp::LogStream  log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream  log(__PRETTY_FUNCTION__);
   smpp_pdu::PDU_unbind recieved_pdu(rawpdu->c_str());
   SharedSmppPdu        responsePDU;
 
@@ -834,7 +834,7 @@ void SessionManager::procpdu_unbind(SharedRawPdu rawpdu)
 //--------------------------------------------------------------------------------
 void SessionManager::procpdu_unbind_resp(SharedRawPdu rawpdu)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   setCurrentState(SessionManager::OPEN);
   log << "CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::endl;
@@ -844,7 +844,7 @@ void SessionManager::procpdu_unbind_resp(SharedRawPdu rawpdu)
 //--------------------------------------------------------------------------------
 void SessionManager::reschedule_enquire_link()
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   enquire_link_timer.cancel();
   enquire_link_response_timer.cancel();
@@ -855,7 +855,7 @@ void SessionManager::reschedule_enquire_link()
 //--------------------------------------------------------------------------------
 void SessionManager::do_enquire_link(const boost::system::error_code& e)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   if(e != boost::asio::error::operation_aborted) {
     // the enquire link timer expired, send an enquire_link pdu to the message centre.
@@ -877,7 +877,7 @@ void SessionManager::do_enquire_link(const boost::system::error_code& e)
 //--------------------------------------------------------------------------------
 void SessionManager::do_enquire_link_failure(const boost::system::error_code& e)
 {
-  kisscpp::LogStream log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   if(e != boost::asio::error::operation_aborted) {
     // the enquire link response wasn't recieved, the bind is broken and most probably the connection as well.
@@ -896,7 +896,7 @@ void SessionManager::do_enquire_link_failure(const boost::system::error_code& e)
 //--------------------------------------------------------------------------------
 void SessionManager::print_pdu(SharedSmppPdu pdu)
 {
-  kisscpp::LogStream  log(-1, __PRETTY_FUNCTION__);
+  kisscpp::LogStream  log(__PRETTY_FUNCTION__);
   std::string          encodedPdu = pdu->encode();
 
   std::stringstream ss;
@@ -908,7 +908,7 @@ void SessionManager::print_pdu(SharedSmppPdu pdu)
 void SessionManager::w4rQ_put(SharedSmppPdu pdu)
 {
   if(pdu->command_id < smpp_pdu::CommandId::BindReceiverResp) { // i.e. This IS NOT a response PDU
-    kisscpp::LogStream             log(-1, __PRETTY_FUNCTION__);
+    kisscpp::LogStream             log(__PRETTY_FUNCTION__);
     boost::lock_guard<boost::mutex> guard(w4rQMutex);
     SharedTimeStampedPdu            stsp;
     stsp.reset(new timeStampedPdu(pdu));
@@ -920,7 +920,7 @@ void SessionManager::w4rQ_put(SharedSmppPdu pdu)
 void SessionManager::w4rQ_pop(SharedRawPdu rawpdu)
 {
   if(rawpdu->cmd_id() > smpp_pdu::CommandId::GenericNack) { // i.e. this IS a response pdu
-    kisscpp::LogStream             log(-1, __PRETTY_FUNCTION__);
+    kisscpp::LogStream             log(__PRETTY_FUNCTION__);
     boost::lock_guard<boost::mutex> guard(w4rQMutex);
     AwaitingResponseMapTypeItr      itr = w4rQ.find(rawpdu->seq_num());
     if(itr != w4rQ.end()) {
@@ -933,7 +933,7 @@ void SessionManager::w4rQ_pop(SharedRawPdu rawpdu)
 void SessionManager::w4rQ_age_cleanup(const boost::system::error_code& e)
 {
   if(e != boost::asio::error::operation_aborted && w4rQ.size() > 0) {
-    kisscpp::LogStream             log(-1, __PRETTY_FUNCTION__);
+    kisscpp::LogStream             log(__PRETTY_FUNCTION__);
     boost::lock_guard<boost::mutex> guard(w4rQMutex);
     for(AwaitingResponseMapTypeItr i = w4rQ.begin(); i != w4rQ.end(); ++i) {
       if((i->second)->expired(30)) {                         // TODO: Make this time configurable.
