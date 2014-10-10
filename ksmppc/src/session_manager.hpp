@@ -40,10 +40,11 @@
 #include <smpp_pdu_all.hpp>
 #include <kisscpp/logstream.hpp>
 
-#include "configuration_manager.hpp"
+#include "config.hpp"
 #include "smpppdu_queue.hpp"
 #include "transmit_queue.hpp"
 #include "bind_type.hpp"
+#include "util.hpp"
 #include "sharedsmpppdu.hpp"
 
 using boost::asio::ip::tcp;
@@ -160,18 +161,13 @@ typedef AwaitingResponseMapType::iterator        AwaitingResponseMapTypeItr;
 class SessionManager
 {
   public:
-    SessionManager(boost::asio::io_service &io_service,
-                   SharedConfig             cfg,
-                   SharedSafeSmppPduQ       recieveQueue);
-
+    SessionManager(boost::asio::io_service &io_service, SharedSafeSmppPduQ recieveQueue);
     ~SessionManager() {};
-
-    void send_pdu(const SharedSmppPdu pdu);
-
-    void stop() { stopFlag = true; close_session(false); };
 
     enum State { OPEN, BOUND_TX, BOUND_RX, BOUND_TRX, UNBOUND, CLOSED, OUTBOUND }; // Session States
 
+    void send_pdu           (const SharedSmppPdu         pdu);
+    void stop               ()                              { stopFlag = true; close_session(false); };
     void setSystemId        (smpp_pdu::SystemId         &p) { systemId         = p; }
     void setPassword        (smpp_pdu::Password         &p) { password         = p; }
     void setSystemType      (smpp_pdu::SystemType       &p) { systemType       = p; }
@@ -179,7 +175,7 @@ class SessionManager
     void setAddrTon         (smpp_pdu::Ton              &p) { addrTon          = p; }
     void setAddrNpi         (smpp_pdu::Npi              &p) { addrNpi          = p; }
     void setAddressRange    (smpp_pdu::AddressRange     &p) { addressRange     = p; }
-    void associateRXQ       (SharedSafeSmppPduQ              p) { rxQ              = p; }
+    void associateRXQ       (SharedSafeSmppPduQ          p) { rxQ              = p; }
 
     State                      &getCurrentState    () { return currentState    ; }
     smpp_pdu::SystemId         &getSystemId        () { return systemId        ; }
@@ -258,6 +254,11 @@ class SessionManager
     boost::asio::io_service             &io_service_;
     tcp::socket                          socket_;
     tcp::resolver::iterator              endpoint_iterator;
+    boost::asio::deadline_timer          enquire_link_timer;
+    boost::asio::deadline_timer          enquire_link_response_timer;
+    boost::asio::deadline_timer          w4rQ_ageing_timer;
+
+
 
     std::string                          data_buffer;
     char                                 header_buffer[16];
@@ -271,28 +272,23 @@ class SessionManager
     smpp_pdu::Ton                        addrTon;
     smpp_pdu::Npi                        addrNpi;
     smpp_pdu::AddressRange               addressRange;
+    boost::posix_time::seconds           enquire_link_timeout;
+    boost::posix_time::seconds           enquire_link_resp_timeout;
 
+    BindType                             typeOfBind;
     bool                                 logPduFlag;
     bool                                 stopFlag;
     bool                                 reconnectFlag;
-    BindType                             typeOfBind;
     SharedSafeSmppPduQ                   rxQ;
     ScopedTransmitQ                      txQ;
     State                                currentState;
     SequinceNumberGenerator              seqNumGen;
 
-    boost::posix_time::seconds           enquire_link_timeout;
-    boost::posix_time::seconds           enquire_link_resp_timeout;
-    boost::asio::deadline_timer          enquire_link_timer;
-    boost::asio::deadline_timer          enquire_link_response_timer;
 
     boost::posix_time::ptime             throttleNextSendTime;
     unsigned                             timeBetweenSends; // microseconds between sends
 
-    SharedConfig                         config;
-
-    AwaitingResponseMapType              w4rQ; // a map of sent PDUs that are (W)aiting 4 (R)esponses.
-    boost::asio::deadline_timer          w4rQ_ageing_timer;
+    AwaitingResponseMapType              w4rQ;             // a map of sent PDUs that are (W)aiting 4 (R)esponses.
 
     boost::mutex                         writeMutex;
     boost::mutex                         w4rQMutex;

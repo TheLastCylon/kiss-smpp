@@ -29,7 +29,8 @@
 #include <kisscpp/ptree_queue.hpp>
 #include <kisscpp/logstream.hpp>
 
-#include "configuration_manager.hpp"
+#include "config.hpp"
+#include "util.hpp"
 #include "session_manager.hpp"
 #include "handler_send.hpp"
 #include "smpppdu_queue.hpp"
@@ -66,7 +67,7 @@
 // - Handlers;
 //   -- re-process error buffer
 //   -- dump error buffer
-// - Run application as Daemon
+//*- Run application as Daemon
 // - user traceable messages.
 // - 
 // - Documentation.
@@ -78,7 +79,8 @@ typedef boost::shared_ptr<SessionManager>   SharedSession;
 class ksmppc : public kisscpp::Server
 {
   public:
-    ksmppc(SharedConfig cfg);
+    ksmppc(const std::string &instance,
+           const bool        &runAsDaemon);
     ~ksmppc();
 
   protected:
@@ -97,7 +99,6 @@ class ksmppc : public kisscpp::Server
     SharedSafeSmppPduQ          sendingBuffer;
     SharedSafeSmppPduQ          recieveBuffer;
     SharedSafeSmppPduQ          rcv_errBuffer; //Recieving-error buffer. Perminant comms failures go here
-    SharedConfig                config;
     SharedSession               session;
     bool                        running;
     kisscpp::RequestHandlerPtr  sendHandler;

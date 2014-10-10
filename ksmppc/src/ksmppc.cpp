@@ -21,13 +21,12 @@
 #include "ksmppc.hpp"
 
 //--------------------------------------------------------------------------------
-ksmppc::ksmppc(SharedConfig cfg) :
-  Server(cfg->server_host(), cfg->server_port(), 1),
+ksmppc::ksmppc(const std::string &instance,
+               const bool        &runAsDaemon) :
+  Server(1, "ksmppc", instance, runAsDaemon),
   running(true)
 {
-  kisscpp::LogStream log(__PRETTY_FUNCTION__, "/home/bothadj/tmp/ksmppcTestLog", true);
-
-  config = cfg;
+  kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   constructQueues();
   startSessions();
@@ -63,8 +62,8 @@ void ksmppc::registerHandlers()
 {
   kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
-  if(config->bindType() != RX) { // conditional creation of send handler. i.e. If we only recieve, no sending can take place.
-    sendHandler.reset(new SendHandler(config, sendingBuffer));
+  if(makeBindType(CFG->get<std::string>("smpp_session.bind_type")) != RX) { // conditional creation of send handler. i.e. If we only recieve, no sending can take place.
+    sendHandler.reset(new SendHandler(sendingBuffer));
     register_handler(sendHandler);
   }
 }
@@ -74,7 +73,7 @@ void ksmppc::startSessions()
 {
   kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
-  session.reset(new SessionManager(sessionIoService, config, recieveBuffer));
+  session.reset(new SessionManager(sessionIoService, recieveBuffer));
   threadGroup.create_thread(boost::bind(&boost::asio::io_service::run, &sessionIoService));
 }
 

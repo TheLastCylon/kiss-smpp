@@ -27,16 +27,16 @@ void SendHandler::run(const BoostPtree& request, BoostPtree& response)
 
   try {
 
-    SharedPduSubmitSm submitPDU;
+    SharedPduSubmitSm  submitPDU;
 
     submitPDU.reset(new smpp_pdu::PDU_submit_sm());
 
     submitPDU->service_type             = request.get<std::string>("service-type"          ,"");
-    submitPDU->source_addr     .ton     = request.get<uint8_t>    ("source-addr-ton"       ,(uint8_t)config->addrTon());
-    submitPDU->source_addr     .npi     = request.get<uint8_t>    ("source-addr-npi"       ,(uint8_t)config->addrNpi());
+    submitPDU->source_addr     .ton     = request.get<uint8_t>    ("source-addr-ton"       ,CFG->get<uint8_t>("smpp_session.default_type_of_number"));
+    submitPDU->source_addr     .npi     = request.get<uint8_t>    ("source-addr-npi"       ,CFG->get<uint8_t>("smpp_session.default_number_plan_indicator"));
     submitPDU->source_addr     .address = request.get<std::string>("source-addr");
-    submitPDU->destination_addr.ton     = request.get<uint8_t>    ("destination-addr-ton"  ,(uint8_t)config->addrTon());
-    submitPDU->destination_addr.npi     = request.get<uint8_t>    ("destination-addr-npi"  ,(uint8_t)config->addrNpi());
+    submitPDU->destination_addr.ton     = request.get<uint8_t>    ("destination-addr-ton"  ,CFG->get<uint8_t>("smpp_session.default_type_of_number"));
+    submitPDU->destination_addr.npi     = request.get<uint8_t>    ("destination-addr-npi"  ,CFG->get<uint8_t>("smpp_session.default_number_plan_indicator"));
     submitPDU->destination_addr.address = request.get<std::string>("destination-addr");
     submitPDU->esm_class                = request.get<uint8_t>    ("esm-class"             ,0);
     submitPDU->protocol_id              = request.get<uint8_t>    ("protocol-id"           ,0);

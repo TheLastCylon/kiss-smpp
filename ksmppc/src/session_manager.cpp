@@ -22,38 +22,45 @@
 
 //--------------------------------------------------------------------------------
 SessionManager::SessionManager(boost::asio::io_service &io_service,
-                               SharedConfig             cfg,
                                SharedSafeSmppPduQ       recieveQueue) :
   io_service_                (io_service),
   socket_                    (io_service_),
-  systemId                   (cfg->systemId()),
-  password                   (cfg->password()),
-  systemType                 (cfg->systemType()),
-  interfaceVersion           (cfg->interfaceVersion()),
-  addrTon                    (cfg->addrTon()),
-  addrNpi                    (cfg->addrNpi()),
-  addressRange               (cfg->addressRange()),
+  enquire_link_timer         (io_service_),
+  enquire_link_response_timer(io_service_),
+  w4rQ_ageing_timer          (io_service_),
+//  systemId                   ((CFG->get<std::string> ("smpp_session.system_id"  )).c_str()),
+//  password                   ((CFG->get<std::string> ("smpp_session.password"   )).c_str()),
+//  systemType                 ((CFG->get<std::string> ("smpp_session.system_type")).c_str()),
+//  interfaceVersion           (makeInterfaceVersion(CFG->get<int>("smpp_session.interface_version",34))),
+//  addrTon                    ( CFG->get<uint8_t>     ("smpp_session.default_type_of_number")),
+//  addrNpi                    ( CFG->get<uint8_t>     ("smpp_session.default_number_plan_indicator")),
+//  addressRange               ((CFG->get<std::string> ("smpp_session.address_range")).c_str()),
+  enquire_link_timeout       ( CFG->get<unsigned int>("smpp_session.enquire_link_period")),
+  enquire_link_resp_timeout  ( CFG->get<unsigned int>("smpp_session.enquire_link_response_timeout")),
+//  typeOfBind                 (makeBindType(CFG->get<std::string>("smpp_session.bind_type"))),
   logPduFlag                 (true),                   // TODO: set to false by default after initial testing is completed.
   stopFlag                   (false),
   reconnectFlag              (false),
-  typeOfBind                 (cfg->bindType()),
   rxQ                        (recieveQueue),
-  currentState               (SessionManager::CLOSED),
-  enquire_link_timeout       (cfg->enquirelinkTime()),
-  enquire_link_resp_timeout  (cfg->enquirelinkTime()), // TODO: make this correctly configurable.
-  enquire_link_timer         (io_service_),
-  enquire_link_response_timer(io_service_),
-  w4rQ_ageing_timer          (io_service_)
+  currentState               (SessionManager::CLOSED)
 {
-  config = cfg;
-
   readCount  = 0;
   writeCount = 0;
+
+  systemId                   = (CFG->get<std::string> ("smpp_session.system_id"  )).c_str();
+  password                   = (CFG->get<std::string> ("smpp_session.password"   )).c_str();
+  systemType                 = (CFG->get<std::string> ("smpp_session.system_type")).c_str();
+  interfaceVersion           = makeInterfaceVersion(CFG->get<int>("smpp_session.interface_version",34));
+  addrTon                    =  CFG->get<uint8_t>     ("smpp_session.default_type_of_number");
+  addrNpi                    =  CFG->get<uint8_t>     ("smpp_session.default_number_plan_indicator");
+  addressRange               = (CFG->get<std::string> ("smpp_session.address_range")).c_str();
+  typeOfBind                 = makeBindType(CFG->get<std::string>("smpp_session.bind_type"));
 
   startTime = boost::posix_time::microsec_clock::local_time();
 
   tcp::resolver        resolver(io_service_);
-  tcp::resolver::query query(cfg->mchost(), cfg->mcport());
+  tcp::resolver::query query(CFG->get<std::string>("message_centre.host"),
+                             CFG->get<std::string>("message_centre.port"));
 
   endpoint_iterator    = resolver.resolve(query);
   throttleNextSendTime = boost::posix_time::microsec_clock::local_time();
@@ -67,8 +74,9 @@ SessionManager::SessionManager(boost::asio::io_service &io_service,
 //--------------------------------------------------------------------------------
 void SessionManager::initiate()
 {
-  tcp::resolver        resolver(io_service_);
-  tcp::resolver::query query(config->mchost(), config->mcport());
+  tcp::resolver         resolver(io_service_);
+  tcp::resolver::query  query(CFG->get<std::string>("message_centre.host"),
+                              CFG->get<std::string>("message_centre.port"));
 
   endpoint_iterator = resolver.resolve(query);
 

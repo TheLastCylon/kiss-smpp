@@ -22,7 +22,7 @@ AC_SUBST([BOOST_CFLAGS])
 AC_ARG_WITH([boost-lib-path],
             [AS_HELP_STRING([--with-boost-lib-path], [location of the boost libraries])],
             [BOOST_LIBS="-L$withval -lboost_system -lboost_thread -lboost_filesystem -lboost_regex -lboost_date_time"],
-            [BOOST_LIBS='-lboost_system -lboost_thread -lboost_filesystem -lboost_regex -lboost_date_time'])
+            [BOOST_LIBS='-lboost_system -lboost_thread -lboost_filesystem -lboost_regex -lboost_date_time -lboost_program_options'])
 AC_SUBST([BOOST_LIBS])
 
 AC_ARG_WITH([pthread],

@@ -1,4 +1,4 @@
-// File  : handler_send.hpp
+// File  : util.hpp
 // Author: Dirk J. Botha <bothadj@gmail.com>
 //
 // This file is part of ksmppcd application. Which is part of the KISS-SMPP
@@ -18,42 +18,23 @@
 // along with the ksmppcd application.
 // If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef _HANDLER_SEND_HPP_
-#define _HANDLER_SEND_HPP_
-
-#include <iostream>
-#include <string>
-#include <smpp_pdu_all.hpp>
-
-#include <kisscpp/logstream.hpp>
-#include <kisscpp/request_handler.hpp>
-#include <kisscpp/request_status.hpp>
-#include <kisscpp/boost_ptree.hpp>
-
 #include "util.hpp"
-#include "config.hpp"
-#include "smpppdu_queue.hpp"
 
-class SendHandler : public kisscpp::RequestHandler
+//--------------------------------------------------------------------------------
+uint8_t makeInterfaceVersion(int i)
 {
-  public:
-    SendHandler(SharedSafeSmppPduQ snQ) :
-      kisscpp::RequestHandler("send", "Used for sending messages.")
-    {
-      kisscpp::LogStream log(__PRETTY_FUNCTION__);
+  switch(i) {
+    case 33: return 0x33; break;
+    case 34: return 0x34; break;
+    case 50: return 0x50; break;
+    default: return 0x34; break;
+  }
+}
 
-      sendingQ = snQ;
-    };
-
-    ~SendHandler() {};
-
-    void run(const BoostPtree& request, BoostPtree& response);
-
-  protected:
-
-  private:
-    SharedSafeSmppPduQ sendingQ;
-};
-
-#endif
-
+//--------------------------------------------------------------------------------
+BindType makeBindType(std::string s)
+{
+  if(s == "RX" ) return RX;
+  if(s == "TX" ) return TX;
+  if(s == "TRX") return TRX;
+}
