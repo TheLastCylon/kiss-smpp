@@ -37,6 +37,7 @@ SessionManager::SessionManager(boost::asio::io_service &io_service,
   readCount  = 0;
   writeCount = 0;
 
+  start_session();
   setTxq();
   set_w4rQ_ageing_timer();
   connect();
@@ -78,7 +79,7 @@ void SessionManager::setTxq()
 void SessionManager::connect()
 {
   kisscpp::LogStream log(__PRETTY_FUNCTION__);
-  log << "Connecting" << kisscpp::manip::endl;
+  log << "Connecting" << kisscpp::manip::flush;
   boost::asio::async_connect(socket_,
                              endpoint_iterator,
                              boost::bind(&SessionManager::handle_connect, this, boost::asio::placeholders::error));
@@ -102,7 +103,7 @@ void SessionManager::setCurrentState(State p)
     case OUTBOUND : log << "OUTBOUND" ; break;
     default       : log << "WTF"      ; break;
   }
-  log << kisscpp::manip::endl;
+  log << kisscpp::manip::flush;
 }
 
 //--------------------------------------------------------------------------------
@@ -163,7 +164,7 @@ void SessionManager::close_session(bool re_connect /* = false */)
       break;
   };
 
-  log << "ASYNC CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::endl;
+  log << "ASYNC CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::flush;
   io_service_.post(boost::bind(&SessionManager::close_connection, this));
 }
 
@@ -188,7 +189,7 @@ void SessionManager::close_connection()
 
   setCurrentState(SessionManager::CLOSED);
 
-  log << "Canceling timers." << kisscpp::manip::endl;
+  log << "Canceling timers." << kisscpp::manip::flush;
   enquire_link_timer.cancel();
   enquire_link_response_timer.cancel();
   w4rQ_ageing_timer.cancel();
@@ -197,10 +198,10 @@ void SessionManager::close_connection()
   log << "Closing Socket with read count: [" << readCount
       << "] and write count ["               << writeCount
       << "] start time : "                   << boost::posix_time::to_iso_string(startTime)
-      << kisscpp::manip::endl;
+      << kisscpp::manip::flush;
 
   socket_.close();
-  log << "Socket Closed." << kisscpp::manip::endl;
+  log << "Socket Closed." << kisscpp::manip::flush;
 
   if(!stopFlag && reconnectFlag) {
     reconnectFlag = false;
@@ -215,7 +216,7 @@ void SessionManager::handle_connect(const boost::system::error_code& error)
   kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   if (!error) {
-    log << "Connected" << kisscpp::manip::endl;
+    log << "Connected" << kisscpp::manip::flush;
 
     setCurrentState(SessionManager::OPEN);
 
@@ -228,13 +229,13 @@ void SessionManager::handle_connect(const boost::system::error_code& error)
                             boost::asio::buffer(trpdu->headerBuf(), 16),
                             boost::bind(&SessionManager::handle_read_header, this, trpdu, boost::asio::placeholders::error));
   } else {
-    log << "Connection failed: [" << error.message() << "]" << kisscpp::manip::endl;
+    log << "Connection failed: [" << error.message() << "]" << kisscpp::manip::flush;
     if(!stopFlag) {
-      log << "Next connection attempt in 5 seconds." << kisscpp::manip::endl;
+      log << "Next connection attempt in 5 seconds." << kisscpp::manip::flush;
       sleep(5); // TODO: should be configurable.
       connect();
     } else {
-      log << "No further connection attempts will be made" << kisscpp::manip::endl;
+      log << "No further connection attempts will be made" << kisscpp::manip::flush;
     }
   }
 }
@@ -247,22 +248,22 @@ void SessionManager::handle_read_header(SharedRawPdu rawpdu, const boost::system
   if(!error) {
     log << "Header Read success: Command Length [" << rawpdu->cmd_length()
         << "] body length ["                       << rawpdu->bodyLength()
-        << "]" << kisscpp::manip::endl;
+        << "]" << kisscpp::manip::flush;
 
     boost::asio::async_read(socket_,
                             boost::asio::buffer(rawpdu->bodyBuf(), rawpdu->bodyLength()),
                             boost::bind(&SessionManager::handle_read_body, this, rawpdu, boost::asio::placeholders::error));
   } else {
-    log << "Error - closing. [" << error.message() << "]" << kisscpp::manip::endl;
+    log << "Error - closing. [" << error.message() << "]" << kisscpp::manip::flush;
 
     if(!stopFlag) {
       if(error == boost::asio::error::eof) {
         setCurrentState(SessionManager::CLOSED);
         reconnectFlag = true;
-        log << "ASYNC CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::endl;
+        log << "ASYNC CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::flush;
         io_service_.post(boost::bind(&SessionManager::close_connection, this));
       } else {
-        log << "CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::endl;
+        log << "CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::flush;
         close_session(true);
       }
     }
@@ -282,22 +283,22 @@ void SessionManager::handle_read_body(SharedRawPdu rawpdu, const boost::system::
     nextRawPdu.reset(new RawPdu());
 
     readCount++;
-    log << "Reading count: " << readCount << kisscpp::manip::endl;
+    log << "Reading count: " << readCount << kisscpp::manip::flush;
 
     boost::asio::async_read(socket_,
                             boost::asio::buffer(nextRawPdu->headerBuf(), 16),
                             boost::bind(&SessionManager::handle_read_header, this, nextRawPdu, boost::asio::placeholders::error));
   } else {
-    log << "handle_read_body: error - closing. [" << error.message() << "]" << kisscpp::manip::endl;
+    log << "handle_read_body: error - closing. [" << error.message() << "]" << kisscpp::manip::flush;
 
     if(!stopFlag) {
       if(error == boost::asio::error::eof) {
         setCurrentState(SessionManager::CLOSED);
         reconnectFlag = true;
-        log << "ASYNC CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::endl;
+        log << "ASYNC CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::flush;
         io_service_.post(boost::bind(&SessionManager::close_connection, this));
       } else {
-        log << "CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::endl;
+        log << "CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::flush;
         close_session(true);
       }
     }
@@ -317,13 +318,13 @@ void SessionManager::handle_write(const boost::system::error_code& error)
       write_pdu();
     }
   } else {
-    log << "Handle Write error. [" << error.message() << "]" << kisscpp::manip::endl;
+    log << "Handle Write error. [" << error.message() << "]" << kisscpp::manip::flush;
     txQ->push_back_last_pop();
 
     if(!stopFlag) {
       setCurrentState(SessionManager::CLOSED);
       reconnectFlag = true;
-      log << "ASYNC CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::endl;
+      log << "ASYNC CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::flush;
       io_service_.post(boost::bind(&SessionManager::close_connection, this));
     }
   }
@@ -336,10 +337,10 @@ void SessionManager::throttle_check()
   boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
   if(now < throttleNextSendTime) {
     boost::posix_time::time_duration td = throttleNextSendTime - now;
-    log << "Sleeping for " << td.total_microseconds() << " microseconds" << kisscpp::manip::endl;
+    log << "Sleeping for " << td.total_microseconds() << " microseconds" << kisscpp::manip::flush;
     usleep(td.total_microseconds());
   } else {
-    log << "Not sleeping." << kisscpp::manip::endl;
+    log << "Not sleeping." << kisscpp::manip::flush;
   }
   throttleNextSendTime = now + boost::posix_time::microseconds(timeBetweenSends);
 }
@@ -430,11 +431,11 @@ void SessionManager::send4state_bound_tx(const SharedSmppPdu pdu)
     case smpp_pdu::CommandId::ReplaceSm        :
     case smpp_pdu::CommandId::SubmitMulti      :
     case smpp_pdu::CommandId::SubmitSm         :
-      log << "posting PDU to txQ." << kisscpp::manip::endl;
+      log << "posting PDU to txQ." << kisscpp::manip::flush;
       do_write(pdu, TransmitQ::MESSAGE);
       break;
     default:
-      log << "unsupported PDU." << kisscpp::manip::endl;
+      log << "unsupported PDU." << kisscpp::manip::flush;
       break;
   }
 }
@@ -447,11 +448,11 @@ void SessionManager::send4state_bound_rx(const SharedSmppPdu pdu)
   switch(pdu->command_id) {
     case smpp_pdu::CommandId::DataSmResp     :
     case smpp_pdu::CommandId::DeliverSmResp  :
-      log << "posting PDU to txQ." << kisscpp::manip::endl;
+      log << "posting PDU to txQ." << kisscpp::manip::flush;
       do_write(pdu, TransmitQ::MESSAGE);
       break;
   default :
-      log << "unsupported PDU" << kisscpp::manip::endl;
+      log << "unsupported PDU" << kisscpp::manip::flush;
       break;
   }
 }
@@ -473,11 +474,11 @@ void SessionManager::send4state_bound_trx(const SharedSmppPdu pdu)
     case smpp_pdu::CommandId::ReplaceSm        :
     case smpp_pdu::CommandId::SubmitMulti      :
     case smpp_pdu::CommandId::SubmitSm         :
-      log << "posting PDU to txQ." << kisscpp::manip::endl;
+      log << "posting PDU to txQ." << kisscpp::manip::flush;
       do_write(pdu, TransmitQ::MESSAGE);
       break;
     default :
-      log << "unsupported PDU"     << kisscpp::manip::endl;
+      log << "unsupported PDU"     << kisscpp::manip::flush;
       break;
   }
 }
@@ -506,12 +507,12 @@ void SessionManager::process4state(SharedRawPdu rawpdu)
                       break;
     }
   } catch(std::runtime_error &e) {
-    log << "Command Length: "         << rawpdu->cmd_length() << kisscpp::manip::endl;
-    log << "Failure to process PDU: " << e.what()             << kisscpp::manip::endl;
+    log << "Command Length: "         << rawpdu->cmd_length() << kisscpp::manip::flush;
+    log << "Failure to process PDU: " << e.what()             << kisscpp::manip::flush;
     std::stringstream ss;
     smpp_pdu::hex_dump(rawpdu->data(), rawpdu->cmd_length(), ss);
-    log << "ERROR PDU:\n" << ss.str() << kisscpp::manip::endl;
-    log << "CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::endl;
+    log << "ERROR PDU:\n" << ss.str() << kisscpp::manip::flush;
+    log << "CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::flush;
     close_session(true);
   }
 }
@@ -697,7 +698,7 @@ void SessionManager::procpdu_deliver_sm(SharedRawPdu rawpdu)
   SharedPduDeliverSm  tpdu;
 
   smpp_pdu::hex_dump(rawpdu->data(), rawpdu->cmd_length(), ss);
-  log << "Recieved DeliverSM:\n" << ss.str() << kisscpp::manip::endl;
+  log << "Recieved DeliverSM:\n" << ss.str() << kisscpp::manip::flush;
 
   recievedPDU.reset(new smpp_pdu::PDU_deliver_sm(rawpdu->c_str()));
 
@@ -711,7 +712,7 @@ void SessionManager::procpdu_deliver_sm(SharedRawPdu rawpdu)
     log << "MSG >";
   }
 
-  log << (std::string)tpdu->short_message << "<" << kisscpp::manip::endl;
+  log << (std::string)tpdu->short_message << "<" << kisscpp::manip::flush;
 
   SharedPduDeliverSmResp responsePDU;
 
@@ -786,20 +787,20 @@ void SessionManager::procpdu_submit_sm_resp(SharedRawPdu rawpdu)
 {
   kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
-  log << "Command Length: " << rawpdu->cmd_length() << kisscpp::manip::endl;
+  log << "Command Length: " << rawpdu->cmd_length() << kisscpp::manip::flush;
   std::stringstream ss;
   smpp_pdu::hex_dump(rawpdu->data(), rawpdu->cmd_length(), ss);
-  log << "PDU:\n" << ss.str() << kisscpp::manip::endl;
+  log << "PDU:\n" << ss.str() << kisscpp::manip::flush;
 
   if(rawpdu->cmd_status() == smpp_pdu::CommandStatus::ESME_ROK) {
     smpp_pdu::PDU_submit_sm_resp recieved_pdu(rawpdu->c_str());
 
-    log << "seqnum = " << recieved_pdu.sequence_number << kisscpp::manip::endl;
+    log << "seqnum = " << recieved_pdu.sequence_number << kisscpp::manip::flush;
 
     // TODO: message was delivered. Send notification to internal application.
   } else {
     smpp_pdu::CommandStatus cmd_err(rawpdu->cmd_status());
-    log << "ERROR: " << cmd_err.long_description(cmd_err) << kisscpp::manip::endl;
+    log << "ERROR: " << cmd_err.long_description(cmd_err) << kisscpp::manip::flush;
   }
 }
 
@@ -821,7 +822,7 @@ void SessionManager::procpdu_unbind(SharedRawPdu rawpdu)
 
   stopFlag      = false;
   reconnectFlag = true;
-  log << "UNBIND CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::endl;
+  log << "UNBIND CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::flush;
   io_service_.post(boost::bind(&SessionManager::close_connection, this));
 }
 
@@ -831,7 +832,7 @@ void SessionManager::procpdu_unbind_resp(SharedRawPdu rawpdu)
   kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
   setCurrentState(SessionManager::OPEN);
-  log << "CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::endl;
+  log << "CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::flush;
   close_session(false);
 }
 
@@ -875,11 +876,11 @@ void SessionManager::do_enquire_link_failure(const boost::system::error_code& e)
                                                    // the bind is broken and most probably the connection as well.
     if(!stopFlag) {                                // Restart everything.
       reconnectFlag = true;
-      log << "CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::endl;
+      log << "CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::flush;
       close_session(false);
     }
   } else {                                         // the enquire link response was recieved, we don't have to do anything.
-    log << "abort detected." << kisscpp::manip::endl;
+    log << "abort detected." << kisscpp::manip::flush;
   }
 }
 
@@ -891,7 +892,7 @@ void SessionManager::print_pdu(SharedSmppPdu pdu)
 
   std::stringstream ss;
   smpp_pdu::hex_dump(reinterpret_cast<const uint8_t*>(encodedPdu.c_str()), encodedPdu.size(), ss);
-  log << "Print PDU:\n" << ss.str() << kisscpp::manip::endl;
+  log << "Print PDU:\n" << ss.str() << kisscpp::manip::flush;
 }
 
 //--------------------------------------------------------------------------------
