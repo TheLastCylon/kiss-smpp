@@ -28,16 +28,6 @@ SessionManager::SessionManager(boost::asio::io_service &io_service,
   enquire_link_timer         (io_service_),
   enquire_link_response_timer(io_service_),
   w4rQ_ageing_timer          (io_service_),
-//  systemId                   ((CFG->get<std::string> ("smpp_session.system_id"  )).c_str()),
-//  password                   ((CFG->get<std::string> ("smpp_session.password"   )).c_str()),
-//  systemType                 ((CFG->get<std::string> ("smpp_session.system_type")).c_str()),
-//  interfaceVersion           (makeInterfaceVersion(CFG->get<int>("smpp_session.interface_version",34))),
-//  addrTon                    ( CFG->get<uint8_t>     ("smpp_session.default_type_of_number")),
-//  addrNpi                    ( CFG->get<uint8_t>     ("smpp_session.default_number_plan_indicator")),
-//  addressRange               ((CFG->get<std::string> ("smpp_session.address_range")).c_str()),
-  enquire_link_timeout       ( CFG->get<unsigned int>("smpp_session.enquire_link_period")),
-  enquire_link_resp_timeout  ( CFG->get<unsigned int>("smpp_session.enquire_link_response_timeout")),
-//  typeOfBind                 (makeBindType(CFG->get<std::string>("smpp_session.bind_type"))),
   logPduFlag                 (true),                   // TODO: set to false by default after initial testing is completed.
   stopFlag                   (false),
   reconnectFlag              (false),
@@ -46,25 +36,6 @@ SessionManager::SessionManager(boost::asio::io_service &io_service,
 {
   readCount  = 0;
   writeCount = 0;
-
-  systemId                   = (CFG->get<std::string> ("smpp_session.system_id"  )).c_str();
-  password                   = (CFG->get<std::string> ("smpp_session.password"   )).c_str();
-  systemType                 = (CFG->get<std::string> ("smpp_session.system_type")).c_str();
-  interfaceVersion           = makeInterfaceVersion(CFG->get<int>("smpp_session.interface_version",34));
-  addrTon                    =  CFG->get<uint8_t>     ("smpp_session.default_type_of_number");
-  addrNpi                    =  CFG->get<uint8_t>     ("smpp_session.default_number_plan_indicator");
-  addressRange               = (CFG->get<std::string> ("smpp_session.address_range")).c_str();
-  typeOfBind                 = makeBindType(CFG->get<std::string>("smpp_session.bind_type"));
-
-  startTime = boost::posix_time::microsec_clock::local_time();
-
-  tcp::resolver        resolver(io_service_);
-  tcp::resolver::query query(CFG->get<std::string>("message_centre.host"),
-                             CFG->get<std::string>("message_centre.port"));
-
-  endpoint_iterator    = resolver.resolve(query);
-  throttleNextSendTime = boost::posix_time::microsec_clock::local_time();
-  timeBetweenSends     = 1000000/20; // TODO: Make number of messages configurable.
 
   setTxq();
   set_w4rQ_ageing_timer();
@@ -88,7 +59,7 @@ void SessionManager::initiate()
 void SessionManager::setTxq()
 {
   std::string qName;
-  switch(typeOfBind) {
+  switch(smppcfg.getTypeOfBind()) {
     case TX : qName = "tx_"; break;
     case RX : qName = "rx_"; break;
     case TRX: qName = "trx"; break;
@@ -166,7 +137,7 @@ void SessionManager::send_pdu(const SharedSmppPdu pdu)
 {
   // This is the only method that external classes should be allowed to use to get messages on to the PDU queue.
   // Right now I don't know wither or not I'll be running into concurrency issues, by having multiple
-  // external sources access this one entry point. i.e. This is a subjecto for extreme testing.
+  // external sources access this one entry point. i.e. This is a subjec for extreme testing.
   switch(currentState) {
     case BOUND_TX : send4state_bound_tx (pdu); break;
     case BOUND_RX : send4state_bound_rx (pdu); break;
@@ -194,6 +165,20 @@ void SessionManager::close_session(bool re_connect /* = false */)
 
   log << "ASYNC CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::endl;
   io_service_.post(boost::bind(&SessionManager::close_connection, this));
+}
+
+//--------------------------------------------------------------------------------
+void SessionManager::start_session()
+{
+  startTime            = boost::posix_time::microsec_clock::local_time();
+
+  tcp::resolver        resolver(io_service_);
+  tcp::resolver::query query(CFG->get<std::string>("message_centre.host"),
+                             CFG->get<std::string>("message_centre.port"));
+
+  endpoint_iterator    = resolver.resolve(query);
+  throttleNextSendTime = boost::posix_time::microsec_clock::local_time();
+  timeBetweenSends     = 1000000/smppcfg.getTxThrottleLimit(); //1000000 micro seconds in a second.
 }
 
 //--------------------------------------------------------------------------------
@@ -400,7 +385,7 @@ void SessionManager::do_bind_request()
   kisscpp::LogStream log(__PRETTY_FUNCTION__);
   SharedPduBindType   bindRequestPDU;
 
-  switch(typeOfBind) {
+  switch(smppcfg.getTypeOfBind()) {
     case TX : bindRequestPDU.reset(new smpp_pdu::PDU_bind_transmitter()); break;
     case RX : bindRequestPDU.reset(new smpp_pdu::PDU_bind_reciever   ()); break;
     case TRX: bindRequestPDU.reset(new smpp_pdu::PDU_bind_transceiver()); break;
@@ -408,13 +393,14 @@ void SessionManager::do_bind_request()
   }
 
   bindRequestPDU->sequence_number   = seqNumGen.next();
-  bindRequestPDU->system_id_        = systemId;
-  bindRequestPDU->password_         = password;
-  bindRequestPDU->system_type_      = systemType;
-  bindRequestPDU->interface_version_= interfaceVersion;
-  bindRequestPDU->ton_              = addrTon;
-  bindRequestPDU->npi_              = addrNpi;
-  bindRequestPDU->address_range_    = addressRange;
+
+  bindRequestPDU->system_id_        = smppcfg.getSystemId        ();
+  bindRequestPDU->password_         = smppcfg.getPassword        ();
+  bindRequestPDU->system_type_      = smppcfg.getSystemType      ();
+  bindRequestPDU->interface_version_= smppcfg.getInterfaceVersion();
+  bindRequestPDU->ton_              = smppcfg.getAddrTon         ();
+  bindRequestPDU->npi_              = smppcfg.getAddrNpi         ();
+  bindRequestPDU->address_range_    = smppcfg.getAddressRange    ();
 
   do_write(bindRequestPDU, TransmitQ::SESSION);
 }
@@ -856,7 +842,7 @@ void SessionManager::reschedule_enquire_link()
 
   enquire_link_timer.cancel();
   enquire_link_response_timer.cancel();
-  enquire_link_timer.expires_from_now(enquire_link_timeout);
+  enquire_link_timer.expires_from_now(smppcfg.getEnquireLinkTimeout());
   enquire_link_timer.async_wait(boost::bind(&SessionManager::do_enquire_link, this, boost::asio::placeholders::error));
 }
 
@@ -865,8 +851,7 @@ void SessionManager::do_enquire_link(const boost::system::error_code& e)
 {
   kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
-  if(e != boost::asio::error::operation_aborted) {
-    // the enquire link timer expired, send an enquire_link pdu to the message centre.
+  if(e != boost::asio::error::operation_aborted) {  // the enquire link timer expired, send an enquire_link pdu to the message centre.
 
     SharedSmppPdu requestPDU;
     requestPDU.reset(new smpp_pdu::PDU_enquire_link());
@@ -874,11 +859,10 @@ void SessionManager::do_enquire_link(const boost::system::error_code& e)
 
     do_write(requestPDU, TransmitQ::SESSION);
 
-    enquire_link_response_timer.expires_from_now(enquire_link_resp_timeout);
+    enquire_link_response_timer.expires_from_now(smppcfg.getEnquireLinkRespTimeout());
     enquire_link_response_timer.async_wait(boost::bind(&SessionManager::do_enquire_link_failure, this, boost::asio::placeholders::error));
 
-  } else {
-    // the enquire link timer was aborted, we don't have to do anything.
+  } else {                                         // the enquire link timer was aborted, we don't have to do anything.
   }
 }
 
@@ -887,16 +871,14 @@ void SessionManager::do_enquire_link_failure(const boost::system::error_code& e)
 {
   kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
-  if(e != boost::asio::error::operation_aborted) {
-    // the enquire link response wasn't recieved, the bind is broken and most probably the connection as well.
-    // Restart everything.
-    if(!stopFlag) {
+  if(e != boost::asio::error::operation_aborted) { // the enquire link response wasn't recieved,
+                                                   // the bind is broken and most probably the connection as well.
+    if(!stopFlag) {                                // Restart everything.
       reconnectFlag = true;
       log << "CLOSE: " << __PRETTY_FUNCTION__ << kisscpp::manip::endl;
       close_session(false);
     }
-  } else {
-    // the enquire link response was recieved, we don't have to do anything.
+  } else {                                         // the enquire link response was recieved, we don't have to do anything.
     log << "abort detected." << kisscpp::manip::endl;
   }
 }
@@ -960,7 +942,7 @@ void SessionManager::set_w4rQ_ageing_timer()
   // TODO: the timer should expire at half the max age of a sent PDU
   // TODO: this is so that the true max age will never be more than maxage+maxage/2
   // TODO: Note in the documentation that this should never be set to more than 60 seconds, use 30 seconds as good default.
-  w4rQ_ageing_timer.expires_from_now(enquire_link_timeout); // TODO: Make this time properly configurable.
+  w4rQ_ageing_timer.expires_from_now(smppcfg.getEnquireLinkTimeout()); // TODO: Make this time properly configurable.
   w4rQ_ageing_timer.async_wait(boost::bind(&SessionManager::w4rQ_age_cleanup, this, boost::asio::placeholders::error));
 }
 

@@ -43,66 +43,15 @@
 #include "cfg.hpp"
 #include "smpppdu_queue.hpp"
 #include "transmit_queue.hpp"
+
+#include "smpp_session_config.hpp"
+
 #include "bind_type.hpp"
-#include "util.hpp"
 #include "sharedsmpppdu.hpp"
+#include "rawpdu.hpp"
 
 using boost::asio::ip::tcp;
 
-
-//--------------------------------------------------------------------------------
-class RawPdu
-{
-
-  public:
-    RawPdu() :
-      header    (NULL),
-      fullBuffer(NULL),
-      body      (NULL)
-    {
-      header = new uint8_t[16];
-    }
-
-    ~RawPdu()
-    {
-      if(header && fullBuffer) {
-        delete [] fullBuffer;
-      } else if(header) {
-        delete [] header;
-      }
-    }
-
-    uint8_t *bodyBuf()
-    {
-      if(header) {
-        if(fullBuffer) delete fullBuffer;
-        fullBuffer = new uint8_t[cmd_length()];
-        memcpy(fullBuffer, header, 16);
-        delete [] header;
-        header     = fullBuffer;
-        body       = fullBuffer + 16;
-      }
-      return body;
-    }
-
-    uint8_t    *data      () { return fullBuffer; }
-    uint8_t    *headerBuf () { return header; }
-    const char *c_str     () { return (fullBuffer)?reinterpret_cast<const char *>(fullBuffer):NULL; }
-
-    uint32_t    bodyLength() { return (cmd_length() - 16); }
-    uint32_t    cmd_length() { return (header)?smpp_pdu::get_command_length (header):0; }
-    uint32_t    cmd_id    () { return (header)?smpp_pdu::get_command_id     (header):0; }
-    uint32_t    cmd_status() { return (header)?smpp_pdu::get_command_status (header):0; }
-    uint32_t    seq_num   () { return (header)?smpp_pdu::get_sequence_number(header):0; }
-      
-  private:
-    uint8_t  *header;
-    uint8_t  *fullBuffer;
-    uint8_t  *body;
-    uint32_t  cmdLength;
-};
-
-typedef boost::shared_ptr<RawPdu> SharedRawPdu;
 
 //--------------------------------------------------------------------------------
 class SequinceNumberGenerator
@@ -166,28 +115,21 @@ class SessionManager
 
     enum State { OPEN, BOUND_TX, BOUND_RX, BOUND_TRX, UNBOUND, CLOSED, OUTBOUND }; // Session States
 
-    void send_pdu           (const SharedSmppPdu         pdu);
-    void stop               ()                              { stopFlag = true; close_session(false); };
-    void setSystemId        (smpp_pdu::SystemId         &p) { systemId         = p; }
-    void setPassword        (smpp_pdu::Password         &p) { password         = p; }
-    void setSystemType      (smpp_pdu::SystemType       &p) { systemType       = p; }
-    void setInterfaceVersion(smpp_pdu::InterfaceVersion &p) { interfaceVersion = p; }
-    void setAddrTon         (smpp_pdu::Ton              &p) { addrTon          = p; }
-    void setAddrNpi         (smpp_pdu::Npi              &p) { addrNpi          = p; }
-    void setAddressRange    (smpp_pdu::AddressRange     &p) { addressRange     = p; }
-    void associateRXQ       (SharedSafeSmppPduQ          p) { rxQ              = p; }
+    void   send_pdu           (const SharedSmppPdu pdu);
+    void   stop               ()                        { stopFlag = true; close_session(false); };
+    State &getCurrentState    ()                        { return currentState    ; }
 
-    State                      &getCurrentState    () { return currentState    ; }
-    smpp_pdu::SystemId         &getSystemId        () { return systemId        ; }
-    smpp_pdu::Password         &getPassword        () { return password        ; }
-    smpp_pdu::SystemType       &getSystemType      () { return systemType      ; }
-    smpp_pdu::InterfaceVersion &getInterfaceVersion() { return interfaceVersion; }
-    smpp_pdu::Ton              &getAddrTon         () { return addrTon         ; }
-    smpp_pdu::Npi              &getAddrNpi         () { return addrNpi         ; }
-    smpp_pdu::AddressRange     &getAddressRange    () { return addressRange    ; }
+    smpp_pdu::SystemId         &getSystemId        () { return smppcfg.getSystemId        ();}
+    smpp_pdu::Password         &getPassword        () { return smppcfg.getPassword        ();}
+    smpp_pdu::SystemType       &getSystemType      () { return smppcfg.getSystemType      ();}
+    smpp_pdu::InterfaceVersion &getInterfaceVersion() { return smppcfg.getInterfaceVersion();}
+    smpp_pdu::Ton              &getAddrTon         () { return smppcfg.getAddrTon         ();}
+    smpp_pdu::Npi              &getAddrNpi         () { return smppcfg.getAddrNpi         ();}
+    smpp_pdu::AddressRange     &getAddressRange    () { return smppcfg.getAddressRange    ();}
 
   private:
     void close_session                   (bool re_connect = false);
+    void start_session                   ();
     void initiate                        ();
     void setTxq                          ();
     void connect                         ();
@@ -243,7 +185,7 @@ class SessionManager
     void do_enquire_link                 (const boost::system::error_code& e);
     void do_enquire_link_failure         (const boost::system::error_code& e);
 
-    void print_pdu                       (SharedSmppPdu pdu); // this method exists for debug purposes only, don't use it if you don't need to.
+    void print_pdu                       (SharedSmppPdu                    pdu); // this method exists for debug purposes only, don't use it if you don't need to.
 
     void w4rQ_put                        (SharedSmppPdu                    pdu);
     void w4rQ_pop                        (SharedRawPdu                     rawpdu);
@@ -258,24 +200,13 @@ class SessionManager
     boost::asio::deadline_timer          enquire_link_response_timer;
     boost::asio::deadline_timer          w4rQ_ageing_timer;
 
-
-
     std::string                          data_buffer;
     char                                 header_buffer[16];
     char                                *body_buffer;
     uint32_t                             body_length;
 
-    smpp_pdu::SystemId                   systemId;
-    smpp_pdu::Password                   password;
-    smpp_pdu::SystemType                 systemType;
-    smpp_pdu::InterfaceVersion           interfaceVersion;
-    smpp_pdu::Ton                        addrTon;
-    smpp_pdu::Npi                        addrNpi;
-    smpp_pdu::AddressRange               addressRange;
-    boost::posix_time::seconds           enquire_link_timeout;
-    boost::posix_time::seconds           enquire_link_resp_timeout;
+    SmppSessionConfiguration             smppcfg;
 
-    BindType                             typeOfBind;
     bool                                 logPduFlag;
     bool                                 stopFlag;
     bool                                 reconnectFlag;
@@ -283,7 +214,6 @@ class SessionManager
     ScopedTransmitQ                      txQ;
     State                                currentState;
     SequinceNumberGenerator              seqNumGen;
-
 
     boost::posix_time::ptime             throttleNextSendTime;
     unsigned                             timeBetweenSends; // microseconds between sends
@@ -293,8 +223,8 @@ class SessionManager
     boost::mutex                         writeMutex;
     boost::mutex                         w4rQMutex;
 
-    unsigned                             readCount;  // microseconds between sends
-    unsigned                             writeCount; // microseconds between sends
+    unsigned                             readCount;        // microseconds between sends
+    unsigned                             writeCount;       // microseconds between sends
     boost::posix_time::ptime             startTime;
 };
 

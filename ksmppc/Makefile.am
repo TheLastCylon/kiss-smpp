@@ -10,10 +10,12 @@ ksmppcd_SOURCES     = src/bind_type.hpp \
                       src/ksmppc.cpp \
                       src/ksmppc.hpp \
                       src/main.cpp \
+                      src/rawpdu.hpp \
                       src/session_manager.cpp \
                       src/session_manager.hpp \
                       src/sharedsmpppdu.hpp \
                       src/smpppdu_queue.hpp \
+                      src/smpp_session_config.hpp \
                       src/transmit_queue.hpp \
                       src/util.hpp \
                       src/util.cpp
