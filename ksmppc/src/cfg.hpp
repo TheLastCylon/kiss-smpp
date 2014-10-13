@@ -1,4 +1,4 @@
-// File  : handler_send.hpp
+// File  : cfg.hpp
 // Author: Dirk J. Botha <bothadj@gmail.com>
 //
 // This file is part of ksmppcd application. Which is part of the KISS-SMPP
@@ -18,42 +18,11 @@
 // along with the ksmppcd application.
 // If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef _HANDLER_SEND_HPP_
-#define _HANDLER_SEND_HPP_
+#ifndef _CONFIG_HPP_
+#define _CONFIG_HPP_
 
-#include <iostream>
-#include <string>
-#include <smpp_pdu_all.hpp>
+#include <kisscpp/configuration.hpp>
 
-#include <kisscpp/logstream.hpp>
-#include <kisscpp/request_handler.hpp>
-#include <kisscpp/request_status.hpp>
-#include <kisscpp/boost_ptree.hpp>
-
-#include "util.hpp"
-#include "cfg.hpp"
-#include "smpppdu_queue.hpp"
-
-class SendHandler : public kisscpp::RequestHandler
-{
-  public:
-    SendHandler(SharedSafeSmppPduQ snQ) :
-      kisscpp::RequestHandler("send", "Used for sending messages.")
-    {
-      kisscpp::LogStream log(__PRETTY_FUNCTION__);
-
-      sendingQ = snQ;
-    };
-
-    ~SendHandler() {};
-
-    void run(const BoostPtree& request, BoostPtree& response);
-
-  protected:
-
-  private:
-    SharedSafeSmppPduQ sendingQ;
-};
+#define CFG kisscpp::Config::instance()
 
 #endif
-

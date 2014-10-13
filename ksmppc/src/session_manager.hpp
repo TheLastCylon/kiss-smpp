@@ -40,7 +40,7 @@
 #include <smpp_pdu_all.hpp>
 #include <kisscpp/logstream.hpp>
 
-#include "config.hpp"
+#include "cfg.hpp"
 #include "smpppdu_queue.hpp"
 #include "transmit_queue.hpp"
 #include "bind_type.hpp"

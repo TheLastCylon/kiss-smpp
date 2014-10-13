@@ -29,7 +29,7 @@
 #include <kisscpp/ptree_queue.hpp>
 #include <kisscpp/logstream.hpp>
 
-#include "config.hpp"
+#include "cfg.hpp"
 #include "util.hpp"
 #include "session_manager.hpp"
 #include "handler_send.hpp"
