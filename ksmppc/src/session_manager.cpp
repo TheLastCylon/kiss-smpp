@@ -47,8 +47,8 @@ SessionManager::SessionManager(boost::asio::io_service &io_service,
 void SessionManager::initiate()
 {
   tcp::resolver         resolver(io_service_);
-  tcp::resolver::query  query(CFG->get<std::string>("message_centre.host"),
-                              CFG->get<std::string>("message_centre.port"));
+  tcp::resolver::query  query(CFG->get<std::string>("message-centre.host"),
+                              CFG->get<std::string>("message-centre.port"));
 
   endpoint_iterator = resolver.resolve(query);
 
@@ -174,8 +174,8 @@ void SessionManager::start_session()
   startTime            = boost::posix_time::microsec_clock::local_time();
 
   tcp::resolver        resolver(io_service_);
-  tcp::resolver::query query(CFG->get<std::string>("message_centre.host"),
-                             CFG->get<std::string>("message_centre.port"));
+  tcp::resolver::query query(CFG->get<std::string>("message-centre.host"),
+                             CFG->get<std::string>("message-centre.port"));
 
   endpoint_iterator    = resolver.resolve(query);
   throttleNextSendTime = boost::posix_time::microsec_clock::local_time();

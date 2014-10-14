@@ -62,7 +62,7 @@ void ksmppc::registerHandlers()
 {
   kisscpp::LogStream log(__PRETTY_FUNCTION__);
 
-  if(makeBindType(CFG->get<std::string>("smpp_session.bind_type")) != RX) { // conditional creation of send handler. i.e. If we only recieve, no sending can take place.
+  if(makeBindType(CFG->get<std::string>("smpp-session.bind-type")) != RX) { // conditional creation of send handler. i.e. If we only recieve, no sending can take place.
     sendHandler.reset(new SendHandler(sendingBuffer));
     register_handler(sendHandler);
   }
@@ -160,18 +160,18 @@ void ksmppc::deliverSm2Ptree(SharedSmppPdu pdu, BoostPtree &pt)
 
   SharedPduDeliverSm tpdu = boost::dynamic_pointer_cast<smpp_pdu::PDU_deliver_sm>(pdu);
 
-  pt.put("service_type"           , tpdu->service_type            .data());
-  pt.put("source_addr"            , tpdu->source_addr.address     .data());
-  pt.put("destination_addr"       , tpdu->destination_addr.address.data());
-  pt.put("esm_class"              , tpdu->esm_class               .data());
-  pt.put("protocol_id"            , tpdu->protocol_id             .data());
-  pt.put("priority_flag"          , tpdu->priority_flag           .data());
-  pt.put("schedule_delivery_time" , tpdu->schedule_delivery_time  .data());
-  pt.put("validity_period"        , tpdu->validity_period         .data());
-  pt.put("registered_delivery"    , tpdu->registered_delivery     .data());
-  pt.put("replace_if_present_flag", tpdu->replace_if_present_flag .data());
-  pt.put("data_coding"            , tpdu->data_coding             .data());
-  pt.put("sm_default_msg_id"      , tpdu->sm_default_msg_id       .data());
-  pt.put("short_message"          , tpdu->short_message           .data());
+  pt.put("service-type"           , tpdu->service_type            .data());
+  pt.put("source-addr"            , tpdu->source_addr.address     .data());
+  pt.put("destination-addr"       , tpdu->destination_addr.address.data());
+  pt.put("esm-class"              , tpdu->esm_class               .data());
+  pt.put("protocol-id"            , tpdu->protocol_id             .data());
+  pt.put("priority-flag"          , tpdu->priority_flag           .data());
+  pt.put("schedule-delivery-time" , tpdu->schedule_delivery_time  .data());
+  pt.put("validity-period"        , tpdu->validity_period         .data());
+  pt.put("registered-delivery"    , tpdu->registered_delivery     .data());
+  pt.put("replace-if-present-flag", tpdu->replace_if_present_flag .data());
+  pt.put("data-coding"            , tpdu->data_coding             .data());
+  pt.put("sm-default-msg-id"      , tpdu->sm_default_msg_id       .data());
+  pt.put("short-message"          , tpdu->short_message           .data());
 }
 

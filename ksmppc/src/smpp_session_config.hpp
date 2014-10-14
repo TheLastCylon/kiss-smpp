@@ -33,18 +33,18 @@ class SmppSessionConfiguration
 {
   public:
     SmppSessionConfiguration() :
-      enquire_link_timeout     (CFG->get<unsigned int>("smpp_session.enquire_link_period")),
-      enquire_link_resp_timeout(CFG->get<unsigned int>("smpp_session.enquire_link_response_timeout"))
+      enquire_link_timeout     (CFG->get<unsigned int>("smpp-session.enquire-link-period")),
+      enquire_link_resp_timeout(CFG->get<unsigned int>("smpp-session.enquire-link-response-timeout"))
     {
-      systemId                  = (CFG->get<std::string> ("smpp_session.system_id"  )).c_str();
-      password                  = (CFG->get<std::string> ("smpp_session.password"   )).c_str();
-      systemType                = (CFG->get<std::string> ("smpp_session.system_type")).c_str();
-      interfaceVersion          = makeInterfaceVersion(CFG->get<int>("smpp_session.interface_version",34));
-      addrTon                   =  CFG->get<uint8_t>     ("smpp_session.default_type_of_number");
-      addrNpi                   =  CFG->get<uint8_t>     ("smpp_session.default_number_plan_indicator");
-      addressRange              = (CFG->get<std::string> ("smpp_session.address_range")).c_str();
-      tx_throttle_limit         =  CFG->get<unsigned int>("smpp_session.tx_throttle_limit");
-      typeOfBind                = makeBindType(CFG->get<std::string>("smpp_session.bind_type"));
+      systemId                  = (CFG->get<std::string> ("smpp-session.system-id"  )).c_str();
+      password                  = (CFG->get<std::string> ("smpp-session.password"   )).c_str();
+      systemType                = (CFG->get<std::string> ("smpp-session.system-type")).c_str();
+      interfaceVersion          = makeInterfaceVersion(CFG->get<int>("smpp-session.interface-version",34));
+      addrTon                   =  CFG->get<uint8_t>     ("smpp-session.default-type-of-number");
+      addrNpi                   =  CFG->get<uint8_t>     ("smpp-session.default-number-plan-indicator");
+      addressRange              = (CFG->get<std::string> ("smpp-session.address-range")).c_str();
+      tx_throttle_limit         =  CFG->get<unsigned int>("smpp-session.tx-throttle-limit");
+      typeOfBind                = makeBindType(CFG->get<std::string>("smpp-session.bind-type"));
     }
 
     ~SmppSessionConfiguration() {}
