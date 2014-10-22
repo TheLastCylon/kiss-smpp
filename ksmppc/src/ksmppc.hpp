@@ -30,6 +30,7 @@
 #include <kisscpp/logstream.hpp>
 
 #include "cfg.hpp"
+#include "stat.hpp"
 #include "util.hpp"
 #include "session_manager.hpp"
 #include "handler_send.hpp"

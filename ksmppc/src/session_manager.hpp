@@ -37,15 +37,16 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+
 #include <smpp_pdu_all.hpp>
+
 #include <kisscpp/logstream.hpp>
 
 #include "cfg.hpp"
+#include "stat.hpp"
 #include "smpppdu_queue.hpp"
 #include "transmit_queue.hpp"
-
 #include "smpp_session_config.hpp"
-
 #include "bind_type.hpp"
 #include "sharedsmpppdu.hpp"
 #include "rawpdu.hpp"

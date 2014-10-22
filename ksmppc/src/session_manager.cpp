@@ -37,6 +37,9 @@ SessionManager::SessionManager(boost::asio::io_service &io_service,
   readCount  = 0;
   writeCount = 0;
 
+  statSet("pdu.sent"    , 0);
+  statSet("pdu.recieved", 0);
+
   start_session();
   setTxq();
   set_w4rQ_ageing_timer();
@@ -284,6 +287,7 @@ void SessionManager::handle_read_body(SharedRawPdu rawpdu, const boost::system::
 
     readCount++;
     log << "Reading count: " << readCount << kisscpp::manip::flush;
+    statInc("pdu.recieved");
 
     boost::asio::async_read(socket_,
                             boost::asio::buffer(nextRawPdu->headerBuf(), 16),
@@ -378,6 +382,7 @@ void SessionManager::write_pdu()
   boost::asio::async_write(socket_,
                            boost::asio::buffer(tbuf.c_str(), tbuf.size()),
                            boost::bind(&SessionManager::handle_write, this, boost::asio::placeholders::error));
+  statInc("pdu.sent");
 }
 
 //--------------------------------------------------------------------------------

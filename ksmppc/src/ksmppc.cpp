@@ -55,6 +55,10 @@ void ksmppc::constructQueues()
   sendingBuffer.reset(new SafeSmppPduQ("sendingBuffer", "/tmp", 10)); // TODO: The working direcory needs to be obtained from the Config file.
   recieveBuffer.reset(new SafeSmppPduQ("recieveBuffer", "/tmp", 10));
   rcv_errBuffer.reset(new SafeSmppPduQ("rcv_errBuffer", "/tmp", 10));
+
+  statQue("queues.sending",sendingBuffer);
+  statQue("queues.recieve",recieveBuffer);
+  statQue("queues.rcv_err",rcv_errBuffer);
 }
 
 //--------------------------------------------------------------------------------
