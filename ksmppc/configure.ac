@@ -1,4 +1,4 @@
-AC_INIT([KISS SMPP Client], [0.5], [bothadjt@gmail.com], [ksmppcd], [http://djb.co.za/])
+AC_INIT([KISS SMPP Client], [0.5], [bothadjt@gmail.com], [ksmppc], [http://djb.co.za/])
 AC_PREREQ([2.59])
 AM_INIT_AUTOMAKE([1.10 -Wall no-define])
 AC_CONFIG_HEADERS([config.h])

@@ -2,9 +2,9 @@ AUTOMAKE_OPTIONS    = subdir-objects
 ACLOCAL_AMFLAGS     = -I m4
 EXTRA_DIST          = bootstrap
 AM_CPPFLAGS         = $(DEPS_CFLAGS) $(BOOST_CFLAGS)
-ksmppcd_LDADD       = $(DEPS_LIBS) $(BOOST_LIBS) $(PTHREAD_LIB)
-bin_PROGRAMS        = ksmppcd
-ksmppcd_SOURCES     = src/bind_type.hpp \
+ksmppc_LDADD        = $(DEPS_LIBS) $(BOOST_LIBS) $(PTHREAD_LIB)
+bin_PROGRAMS        = ksmppc
+ksmppc_SOURCES      = src/bind_type.hpp \
                       src/cfg.hpp \
                       src/handler_send.cpp \
                       src/handler_send.hpp \
