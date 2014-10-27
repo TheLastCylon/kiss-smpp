@@ -27,8 +27,9 @@ AC_ARG_WITH([boost-lib-path],
             [BOOST_LIBS='-lboost_system -lboost_thread -lboost_filesystem -lboost_regex -lboost_date_time -lboost_program_options'])
 AC_SUBST([BOOST_LIBS])
 
+PTHREAD_LIB="-lpthread"
 AC_ARG_WITH([pthread],
-            [AS_HELP_STRING([--with-pthread], [build pthread support @<:@default: automatic@:>@])],
+            [AS_HELP_STRING([--without-pthread], [ignore pthread support @<:@default: automatic@:>@])],
             [PTHREAD_LIB="-lpthread"])
 AC_SUBST([PTHREAD_LIB])
 
