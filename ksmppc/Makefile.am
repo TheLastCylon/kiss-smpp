@@ -1,8 +1,8 @@
 AUTOMAKE_OPTIONS    = subdir-objects
 ACLOCAL_AMFLAGS     = -I m4
 EXTRA_DIST          = bootstrap
-AM_CPPFLAGS         = $(DEPS_CFLAGS) $(BOOST_CFLAGS)
-ksmppc_LDADD        = $(DEPS_LIBS) $(BOOST_LIBS) $(PTHREAD_LIB)
+AM_CPPFLAGS         = $(DEPS_CFLAGS) $(BOOST_CFLAGS) $(KISSCPP_CFLAGS) $(SMPPPDU_CFLAGS)
+ksmppc_LDADD        = $(DEPS_LIBS) $(BOOST_LIBS) $(PTHREAD_LIB) $(KISSCPP_LIB) $(SMPP_PDU_LIB)
 bin_PROGRAMS        = ksmppc
 ksmppc_SOURCES      = src/bind_type.hpp \
                       src/cfg.hpp \
