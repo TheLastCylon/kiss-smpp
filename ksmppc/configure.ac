@@ -6,14 +6,14 @@ AC_PROG_CXX
 AC_CONFIG_MACRO_DIR([m4])
 
 BOOST_REQUIRE([1.54.0])
-BOOST_SYSTEM
-BOOST_ASIO
-BOOST_DATE_TIME
-BOOST_FILESYSTEM
-BOOST_REGEX
-BOOST_THREAD
-BOOST_DATE_TIME
-BOOST_PROGRAM_OPTIONS
+#BOOST_SYSTEM
+#BOOST_ASIO
+#BOOST_DATE_TIME
+#BOOST_FILESYSTEM
+#BOOST_REGEX
+#BOOST_THREAD
+#BOOST_DATE_TIME
+#BOOST_PROGRAM_OPTIONS
 
 AC_ARG_WITH([boost-include-path],
             [AS_HELP_STRING([--with-boost-include-path], [location of the boost headers, defaults to /usr/include])],
@@ -33,7 +33,7 @@ AC_ARG_WITH([pthread],
             [PTHREAD_LIB="-lpthread"])
 AC_SUBST([PTHREAD_LIB])
 
-PKG_CHECK_MODULES([DEPS], [smpp_pdu-1 >= 0.5 kisscpp-1 >= 0.5])
+PKG_CHECK_MODULES([DEPS], [smpp_pdu >= 0.5 kisscpp >= 0.5])
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdint.h unistd.h])
