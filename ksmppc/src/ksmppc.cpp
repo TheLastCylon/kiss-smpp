@@ -104,7 +104,7 @@ void ksmppc::recieveProcessor()
         request.put("kcm-hst", "localhost");
         request.put("kcm-prt", "9100");
 
-        kisscpp::client requestSender(request, response, 5); // Instantiation of the kisscpp::client class, sends the message.
+        kisscpp::client requestSender(request, &response, 5); // Instantiation of the kisscpp::client class, sends the message.
 
       } catch(kisscpp::RetryableCommsFailure &e) {
         log << "Retryable comms failure: " << e.what() << kisscpp::manip::endl;
