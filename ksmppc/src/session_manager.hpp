@@ -38,7 +38,7 @@
 #include <boost/thread/locks.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include <smpp_pdu_all.hpp>
+#include <smpppdu_all.hpp>
 
 #include <kisscpp/logstream.hpp>
 

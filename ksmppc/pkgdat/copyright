@@ -1,0 +1,8 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: ksmppc
+Source: <url://example.com>
+
+Files: *
+Copyright: 2014 Dirk Botha bothadj@gmail.com
+License: LGPL V 3
+ Completely open source and without any warrantee of any kind for any reason.

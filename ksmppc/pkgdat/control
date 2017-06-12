@@ -1,0 +1,15 @@
+Source: ksmppc
+Section: unknown
+Priority: optional
+Maintainer: Dirk Botha (TheLastCylon) <bothadj@gmail.com>
+Build-Depends: debhelper (>= 8.0.0), autotools-dev, kisscpp (>= 0.5), omcore (>= 0.5), libsigsegv2:amd64, gawk, libpopt0:amd64, mime-support, libboost1.54-dev, libglib2.0-0:amd64, pkg-config, libmysqlclient-dev
+Standards-Version: 3.9.4
+Homepage: <insert the upstream URL, if relevant>
+#Vcs-Git: git://git.debian.org/collab-maint/ksmppc.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/ksmppc.git;a=summary
+
+Package: ksmppc
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: kiss smpp client
+ open source smpp client based on the kiss-cpp library.

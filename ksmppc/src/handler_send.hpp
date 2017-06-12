@@ -23,7 +23,7 @@
 
 #include <iostream>
 #include <string>
-#include <smpp_pdu_all.hpp>
+#include <smpppdu_all.hpp>
 
 #include <kisscpp/logstream.hpp>
 #include <kisscpp/request_handler.hpp>

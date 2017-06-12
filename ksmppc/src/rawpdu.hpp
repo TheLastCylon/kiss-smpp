@@ -21,7 +21,7 @@
 #ifndef _RAWPDU_HPP_
 #define _RAWPDU_HPP_
 
-#include <smpp_pdu_all.hpp>
+#include <smpppdu_all.hpp>
 #include <boost/shared_ptr.hpp>
 
 class RawPdu

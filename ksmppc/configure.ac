@@ -34,11 +34,11 @@ AC_ARG_WITH([pthread],
             [PTHREAD_LIB="-lpthread"])
 AC_SUBST([PTHREAD_LIB])
 
-KISSCPP_CFLAGS="-I/usr/include/kisscpp-0.5"
+KISSCPP_CFLAGS="-I/usr/local/include/kisscpp-0.5"
 AC_ARG_WITH([kisscpp-include-path],
             [AS_HELP_STRING([--with-kisscpp-include-path], [location of the kisscpp headers, defaults to /usr/include/kisscpp-0.5])],
             [KISSCPP_CFLAGS="-I$withval"],
-            [KISSCPP_CFLAGS="-I/usr/include/kisscpp-0.5"])
+            [KISSCPP_CFLAGS="-I/usr/local/include/kisscpp-0.5"])
 AC_SUBST([KISSCPP_CFLAGS]) 
 
 AC_ARG_WITH([kisscpp-lib-path],
@@ -47,20 +47,20 @@ AC_ARG_WITH([kisscpp-lib-path],
             [KISSCPP_LIB="-lkisscpp"])
 AC_SUBST([KISSCPP_LIB])
 
-SMPPPDU_CFLAGS="-I/usr/include/smpp_pdu-0.5"
+SMPPPDU_CFLAGS="-I/usr/local/include/smpppdu-0.5"
 AC_ARG_WITH([smpp_pdu-include-path],
-            [AS_HELP_STRING([--with-smpp_pdu-include-path], [location of the smpp_pdu headers, defaults to /usr/include/smpp_pdu-0.5])],
+            [AS_HELP_STRING([--with-smpp_pdu-include-path], [location of the smpp_pdu headers, defaults to /usr/include/smpppdu-0.5])],
             [SMPPPDU_CFLAGS="-I$withval"],
-            [SMPPPDU_CFLAGS="-I/usr/include/smpp_pdu-0.5"])
+            [SMPPPDU_CFLAGS="-I/usr/local/include/smpppdu-0.5"])
 AC_SUBST([SMPPPDU_CFLAGS])
 
 AC_ARG_WITH([smpp_pdu-lib-path],
-            [AS_HELP_STRING([--with-smpp_pdu-lib-path], [location of the smpp_pdu library])],
-            [SMPP_PDU_LIB="-L$withval -lsmpp_pdu"],
-            [SMPP_PDU_LIB="-lsmpp_pdu"])
+            [AS_HELP_STRING([--with-smpp_pdu-lib-path], [location of the smpppdu library])],
+            [SMPP_PDU_LIB="-L$withval -lsmpppdu"],
+            [SMPP_PDU_LIB="-lsmpppdu"])
 AC_SUBST([SMPP_PDU_LIB])
 
-#PKG_CHECK_MODULES([DEPS], [smpp_pdu >= 0.5 kisscpp >= 0.5])
+#PKG_CHECK_MODULES([DEPS], [smpppdu >= 0.5 kisscpp >= 0.5])
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdint.h unistd.h])

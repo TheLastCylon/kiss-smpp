@@ -22,7 +22,7 @@
 #define _SMPPPDU_QUEUE_HPP_
 
 #include <sstream>
-#include <smpp_pdu_all.hpp>
+#include <smpppdu_all.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/property_tree/json_parser.hpp>

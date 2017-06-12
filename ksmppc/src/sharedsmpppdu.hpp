@@ -22,7 +22,7 @@
 #define _SHAREDSMPPPDU_HPP_
 
 #include <boost/shared_ptr.hpp>
-#include <smpp_pdu_all.hpp>
+#include <smpppdu_all.hpp>
 
 typedef boost::shared_ptr<smpp_pdu::SMPP_PDU> SharedSmppPdu;
 

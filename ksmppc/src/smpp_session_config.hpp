@@ -22,7 +22,7 @@
 #define _SMPP_SESSION_CONFIG_HPP_
 
 #include <string>
-#include <smpp_pdu_all.hpp>
+#include <smpppdu_all.hpp>
 
 #include "cfg.hpp"
 #include "bind_type.hpp"

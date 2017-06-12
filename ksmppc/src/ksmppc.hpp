@@ -22,7 +22,7 @@
 #define _KSMPPC_HPP_
 
 #include <boost/thread.hpp>
-#include <smpp_pdu_all.hpp>
+#include <smpppdu_all.hpp>
 
 #include <kisscpp/server.hpp>
 #include <kisscpp/client.hpp>
